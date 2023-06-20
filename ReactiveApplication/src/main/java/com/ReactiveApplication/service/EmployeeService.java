@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ReactiveApplication.dto.EmployeeDto;
+import com.ReactiveApplication.entity.Employee;
 import com.ReactiveApplication.repository.EmployeeRepo;
 import com.ReactiveApplication.utils.AppUtils;
 
@@ -49,9 +50,12 @@ public class EmployeeService {
 	}
 	
 	
-	public Mono<Void> deleteEmployee(int id)
+	public Mono<EmployeeDto> deleteEmployee(int id)
 	{
-		return employeeRepo.deleteById(id);
+		return employeeRepo.findById(id)
+				           .flatMap(existingEmployee -> employeeRepo.delete(existingEmployee)
+				        		                                     .then(Mono.just(existingEmployee)))
+				           .map(AppUtils::entityToDto);
 	}
 	
 }
